@@ -22,6 +22,9 @@ func main() {
 
 	router.HandleFunc("/register", handlers.Register).Methods("POST")
 	router.HandleFunc("/authorize", handlers.Authorize).Methods("POST")
-	
+	router.HandleFunc("/notes", handlers.CreateNote).Methods("POST")
+	router.HandleFunc("/notes/{id}", handlers.UpdateNoteByID).Methods("PATCH")
+	router.HandleFunc("/notes/{id}", handlers.DeleteNoteByID).Methods("DELETE")
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

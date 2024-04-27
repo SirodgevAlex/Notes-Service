@@ -115,13 +115,27 @@ func UpdateNoteByID(w http.ResponseWriter, r *http.Request) {
     userID, err := auth.AuthenticateUser(r)
     if err != nil {
         http.Error(w, err.Error(), http.StatusUnauthorized)
-    	return
+        return
     }
 
     noteAuthorID := note.AuthorID
 
     if userID != noteAuthorID {
         http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+    }
+
+    createdAt, err := db.GetCreatedAtFromNote(noteID)
+    if err != nil {
+        http.Error(w, "Failed to get note creation time", http.StatusInternalServerError)
+        return
+    }
+
+    duration := time.Since(createdAt)
+    days := int(duration.Hours() / 24)
+
+    if days > 1 {
+        http.Error(w, "Too late to update note", http.StatusForbidden)
         return
     }
 
@@ -133,7 +147,6 @@ func UpdateNoteByID(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusOK)
 }
-
 
 func DeleteNoteByID(w http.ResponseWriter, r *http.Request) {
     params := mux.Vars(r)
@@ -166,3 +179,4 @@ func DeleteNoteByID(w http.ResponseWriter, r *http.Request) {
 
     w.WriteHeader(http.StatusNoContent)
 }
+

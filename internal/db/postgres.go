@@ -196,3 +196,13 @@ func GetUserIDFromNote(id string) (string, error) {
     }
     return authorID, nil
 }
+
+
+func GetCreatedAtFromNote(id string) (time.Time, error) {
+    var createdAt time.Time
+    err := db.QueryRow("SELECT created_at FROM notes WHERE id = $1", id).Scan(&createdAt)
+    if err != nil {
+        return time.Time{}, err
+    }
+    return createdAt, nil
+}
