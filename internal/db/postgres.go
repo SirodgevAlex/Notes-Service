@@ -123,3 +123,76 @@ func AuthorizeUser(user models.User) (string, error) {
 
 	return tokenString, nil
 }
+
+func CreateNote(note *models.Note) (int, error) {
+	var id int
+	err := db.QueryRow("INSERT INTO notes(created_at, author_id, title, text) VALUES($1, $2, $3, $4) RETURNING id",
+        note.CreatedAt.Format("2006-01-02 15:04:05"), note.AuthorID, note.Title, note.Text,
+	).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert note into database: %v", err)
+	}
+	if id == 0 {
+		return 0, errors.New("failed to get ID of inserted note")
+	}
+	return id, nil
+}
+
+func UpdateNoteByID(id string, updatedNote *models.Note) error {
+    query := `
+        UPDATE notes
+        SET 
+            title = $1,
+            text = $2,
+        WHERE id = $3
+    `
+
+    _, err := db.Exec(query, updatedNote.Title, updatedNote.Text, id)
+    if err != nil {
+        return fmt.Errorf("failed to update note: %v", err)
+    }
+
+    return nil
+}
+
+func GetNoteByID(id string) (*models.Note, error) {
+	var note models.Note
+	err := db.QueryRow("SELECT id, created_at, author_id, title, text FROM notes WHERE id = $1", id).Scan(
+		&note.ID, &note.CreatedAt, &note.AuthorID, &note.Title, &note.Text,
+	)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, fmt.Errorf("note not found")
+	case err != nil:
+		return nil, err
+	}
+	return &note, nil
+}
+
+func DeleteNoteByID(id string) (error) {
+	result, err := db.Exec("DELETE FROM notes WHERE id=$1", id)
+	if err != nil {
+		return err
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	
+	if rowsAffected == 0 {
+		return errors.New("no note found with the provided ID")
+	}
+
+    return nil
+}
+
+func GetUserIDFromNote(id string) (string, error) {
+    var authorID string
+    err := db.QueryRow("SELECT author_id FROM notes WHERE id = $1", id).Scan(&authorID)
+    if err != nil {
+        return "", err
+    }
+    return authorID, nil
+}

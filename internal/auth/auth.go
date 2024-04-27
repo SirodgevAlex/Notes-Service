@@ -50,25 +50,41 @@ func IsPasswordSafe(password string) bool {
 	return hasUpper && hasLower && hasDigit && hasSpecial
 }
 
-func ExtractUserIdFromToken(r *http.Request) (int, error) {
-	tokenString := r.Header.Get("Authorization")
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+func GetUserIdFromToken(tokenString string) (int, error) {
+    token, _, err := new(jwt.Parser).ParseUnverified(tokenString, &Claims{})
+    if err != nil {
+        fmt.Println("Error during ParseUnverified:", err)
+        return 0, fmt.Errorf("failed to parse token: %s", err)
+    }
 
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
+    claims, ok := token.Claims.(*Claims)
+    if !ok {
+        return 0, errors.New("invalid claims")
+    }
 
-	if err != nil {
-		return 0, fmt.Errorf("ошибка при парсинге токена: %v", err)
-	}
+    userID, err := strconv.Atoi(fmt.Sprintf("%v", claims.UserID))
+    if err != nil {
+        return 0, fmt.Errorf("failed to parse user ID: %s", err)
+    }
 
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		user_id, err := strconv.Atoi(claims.Subject)
-		if err != nil {
-			return 0, fmt.Errorf("ошибка при извлечении идентификатора пользователя из токена: %w", err)
-		}
-		return user_id, nil
-	}
+    return userID, nil
+}
 
-	return 0, errors.New("невозможно извлечь идентификатор пользователя из токена")
+func AuthenticateUser(r *http.Request) (int, error) {
+    bearerToken := r.Header.Get("Authorization")
+    if bearerToken == "" {
+        return 0, errors.New("authorization token required")
+    }
+
+    token := strings.Split(bearerToken, " ")
+    if len(token) != 2 {
+        return 0, errors.New("invalid authorization token")
+    }
+
+    userID, err := GetUserIdFromToken(token[1])
+    if err != nil {
+        return 0, errors.New("failed to authenticate user")
+    }
+
+    return userID, nil
 }
