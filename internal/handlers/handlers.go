@@ -94,6 +94,25 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func GetNoteByID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	noteID := params["id"]
+	
+	note, err := db.GetNoteByID(noteID)
+	if err != nil {
+		http.Error(w, "Failed to fetch note", http.StatusInternalServerError)
+		return
+	}
+	
+	if note == nil {
+		http.Error(w, "Note not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(note)
+}
+
 func UpdateNoteByID(w http.ResponseWriter, r *http.Request) {
     params := mux.Vars(r)
     noteID := params["id"]
@@ -176,7 +195,7 @@ func DeleteNoteByID(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.WriteHeader(http.StatusNoContent)
+    w.WriteHeader(http.StatusOK)
 }
 
 // func ListNotes(page int, startDate, endDate string) ([]models.Note, error) {

@@ -170,19 +170,19 @@ func GetNoteByID(id string) (*models.Note, error) {
 	return &note, nil
 }
 
-func DeleteNoteByID(id string) (error) {
+func DeleteNoteByID(id string) error {
 	result, err := db.Exec("DELETE FROM notes WHERE id=$1", id)
 	if err != nil {
-		return err
+		return fmt.Errorf("ошибка при удалении заметки: %v", err)
 	}
 	
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return fmt.Errorf("ошибка при получении количества затронутых строк: %v", err)
 	}
 	
 	if rowsAffected == 0 {
-		return errors.New("no note found with the provided ID")
+		return errors.New("заметка с указанным ID не найдена")
 	}
 
     return nil
