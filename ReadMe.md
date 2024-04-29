@@ -7,9 +7,8 @@
 docker-compose up --build
 ```
 
-2. p s если мы открываем в бразере, то надо http://localhost:8081, но я запросы делал через терминал (там 8080)
-3. Все, мы все запустили, можно делать сами запросы
-4. Запрос для создания пользователя
+2. Все, мы все запустили, можно делать сами запросы
+3. Запрос для создания пользователя
 
 ```bash
 curl -i -X POST http://localhost:8080/register \
@@ -20,15 +19,14 @@ curl -i -X POST http://localhost:8080/register \
 получим в ответ такой результат
 
 ```bash
-HTTP/1.1 201 Created
-Date: Thu, 28 Mar 2024 11:44:53 GMT
-Content-Length: 60
+Date: Mon, 29 Apr 2024 08:13:01 GMT
+Content-Length: 64
 Content-Type: text/plain; charset=utf-8
 
-{"Id":4,"Email":"sirodgev@yandex.ru","Password":"Sneeeir1_"}
+{"ID":1,"Email":"sirodgev@yandex.ru","Password":"Sneiieir1_"}
 ```
 
-5. Запрос для аутентификации
+4. Запрос для аутентификации
 
 ```bash
 curl -i -X POST http://localhost:8080/authorize \
@@ -41,29 +39,53 @@ curl -i -X POST http://localhost:8080/authorize \
 ```bash
 HTTP/1.1 200 OK
 Content-Type: application/json
-Date: Thu, 28 Mar 2024 19:05:49 GMT
-Content-Length: 158
+Date: Mon, 29 Apr 2024 08:29:43 GMT
+Content-Length: 146
 
-{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNpcm9kZ2V2QHlhbmRleC5ydSIsImV4cCI6MTcxMTgwOTEyM30.m5JXoKxeySEZlfkMIAw2bPZ4TFQUUNs31oh36Z3LpKs"}
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsImV4cCI6MTcxNDM3OTY4Mywic3ViIjoiMSJ9.6ZawYuH5jBYtM6nGMEgh2REVr8cCKLSyPJAx5DuXRZo"}
 ```
 
-6. Запрос для feed
+5. curl запрос для создания заметки
 
 ```bash
-curl -i -X GET http://localhost:8080/feed \
--H 'Content-Type: application/json' \
--H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTE5NjI1MjIsInN1YiI6IjEifQ.O7tIidPWmuGJ4rYJORXADaz34_FK1D51Xqfa5uE5qD4' \
+curl -i -X POST http://localhost:8080/notes \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsImV4cCI6MTcxNDM3OTY4Mywic3ViIjoiMSJ9.6ZawYuH5jBYtM6nGMEgh2REVr8cCKLSyPJAx5DuXRZo" \
+-H "Content-Type: application/json" \
+-d '{
+  "title": "This is a title",
+  "text": "This asdsdis a newf note"
+}'
 ```
 
 получим в ответ такой результат
 
 ```bash
-HTTP/1.1 201 Created
-Date: Mon, 01 Apr 2024 02:53:56 GMT
-Content-Length: 2
-Content-Type: text/plain; charset=utf-8
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Mon, 29 Apr 2024 08:35:29 GMT
+Content-Length: 86
 
-{"user_id":1}
+{"note_id":3,"text":"This asdsdis a newf note","title":"This is a title","user_id":1}
+```
+
+6. Запрос для редактирования заметки
+
+```bash
+curl -i -X PATCH http://localhost:8080/notes/3 \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsImV4cCI6MTcxNDM3OTY4Mywic3ViIjoiMSJ9.6ZawYuH5jBYtM6nGMEgh2REVr8cCKLSyPJAx5DuXRZo" \
+-H "Content-Type: application/json" \
+-d '{
+  "title": "Updated title",
+  "text": "Updated note content"
+}'
+```
+
+получим в ответ такой результат
+
+```bash
+HTTP/1.1 200 OK
+Date: Mon, 29 Apr 2024 08:39:26 GMT
+Content-Length: 0
 ```
 
 если что-то не заработает, то мой тг @sirodgevalex

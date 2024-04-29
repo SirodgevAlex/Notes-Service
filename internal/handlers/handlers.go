@@ -20,9 +20,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.RegisterUser(user)
+	user.ID, err = db.RegisterUser(user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -81,7 +81,6 @@ func CreateNote(w http.ResponseWriter, r *http.Request) {
     }
 
     response := map[string]interface{}{
-        "message": "Note created successfully",
         "note_id": noteID,
         "user_id": userID,
         "title":   note.Title,
@@ -180,3 +179,33 @@ func DeleteNoteByID(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusNoContent)
 }
 
+// func ListNotes(page int, startDate, endDate string) ([]models.Note, error) {
+//     query := "SELECT id, title, text, author FROM notes WHERE 1=1"
+//     if startDate != "" && endDate != "" {
+//         query += " AND created_at BETWEEN $1 AND $2"
+//     }
+//     query += " ORDER BY created_at DESC LIMIT 10 OFFSET $3"
+
+//     rows, err := db.Query(query, startDate, endDate, page*10)
+//     if err != nil {
+//         return nil, err
+//     }
+//     defer rows.Close()
+
+//     var notes []models.Note
+
+//     for rows.Next() {
+//         var note models.Note
+//         err := rows.Scan(&note.ID, &note.AuthorID, &note.Title, &note.Text)
+//         if err != nil {
+//             return nil, err
+//         }
+//         notes = append(notes, note)
+//     }
+
+//     if err := rows.Err(); err != nil {
+//         return nil, err
+//     }
+
+//     return notes, nil
+// }
