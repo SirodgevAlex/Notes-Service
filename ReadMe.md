@@ -121,4 +121,10 @@ Date: Mon, 28 Apr 2024 10:39:26 GMT
 Content-Length: 0
 ```
 
+9. curl запрос для получения списка заметок
+
+```bash
+curl -i -X GET "http://localhost:8080/notes?page=1&start_date=2024-04-29&end_date=2024-04-29"
+```
+
 если что-то не заработает, то мой тг @sirodgevalex

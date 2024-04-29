@@ -206,3 +206,36 @@ func GetCreatedAtFromNote(id string) (time.Time, error) {
     }
     return createdAt, nil
 }
+
+func ListNotes(page int, startDate, endDate string) ([]models.Note, error) {
+    offset := (page - 1) * 10
+
+    query := "SELECT id, title, text, author_id FROM notes WHERE 1=1"
+    if startDate != "" && endDate != "" {
+        query += " AND created_at BETWEEN $1 AND $2"
+    }
+    query += " ORDER BY created_at DESC LIMIT 10 OFFSET $3"
+
+    rows, err := db.Query(query, startDate, endDate, offset)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var notes []models.Note
+
+    for rows.Next() {
+        var note models.Note
+        err := rows.Scan(&note.ID, &note.Title, &note.Text, &note.AuthorID)
+        if err != nil {
+            return nil, err
+        }
+        notes = append(notes, note)
+    }
+
+    if err := rows.Err(); err != nil {
+        return nil, err
+    }
+
+    return notes, nil
+}

@@ -26,6 +26,8 @@ func main() {
 	router.HandleFunc("/notes/{id}", handlers.GetNoteByID).Methods("GET")
 	router.HandleFunc("/notes/{id}", handlers.UpdateNoteByID).Methods("PATCH")
 	router.HandleFunc("/notes/{id}", handlers.DeleteNoteByID).Methods("DELETE")
+	router.HandleFunc("/notes", handlers.ListNotes).Methods("GET")
+
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
