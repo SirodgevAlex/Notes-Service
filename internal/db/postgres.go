@@ -20,7 +20,7 @@ var db *sql.DB
 var jwtKey = []byte("1234")
 
 func ConnectPostgresDB() error {
-    connStr := "postgres://postgres:1234@localhost:5432/notes_service?sslmode=disable"
+    connStr := "postgres://postgres:1234@host.docker.internal:5432/notes_service?sslmode=disable"
     var err error
     db, err = sql.Open("postgres", connStr)
     if err != nil {
